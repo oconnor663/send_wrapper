@@ -120,7 +120,13 @@ impl<T> SendWrapper<T> {
 
 	/// Returns `true` if the value can be safely accessed from within the current thread.
 	pub fn valid(&self) -> bool {
-		self.thread_id == thread::current().id()
+		// Cache the current thread ID as an optimization, to avoid cloning and dropping an Arc
+		// internally each time we access it. If `std::thread::current_id` is eventually
+		// stabilized, we can remove this `thread_local!` and just call that directly.
+		std::thread_local! {
+			static CURRENT_THREAD_ID: ThreadId = thread::current().id();
+		}
+		CURRENT_THREAD_ID.with(|current| *current == self.thread_id)
 	}
 
 	/// Takes the value out of the `SendWrapper<T>`.
