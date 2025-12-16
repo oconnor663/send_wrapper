@@ -149,6 +149,7 @@ impl<T> SendWrapper<T> {
 		}
 	}
 
+	#[cfg(feature = "futures-core")]
 	#[track_caller]
 	fn assert_valid_for_poll(&self) {
 		if !self.valid() {
@@ -270,6 +271,7 @@ fn invalid_deref() -> ! {
 	panic!("{}", DEREF_ERROR)
 }
 
+#[cfg(feature = "futures-core")]
 #[cold]
 #[inline(never)]
 #[track_caller]
